@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -11,9 +12,9 @@ namespace knn
     {
       Console.WriteLine("Begin k-NN classification demo ");
       double[][] trainData = LoadData();
-      int numFeatures = 3;
+      int numFeatures = 4;
       int numClasses = 3;
-      double[] unknown = new double[] { 5.25, 1.75 };
+      double[] unknown = new double[] { 7.2, 3.0, 5.8, 1.6};
       Console.WriteLine("Predictor values: 5.25 1.75 ");
       int k = 1;
       Console.WriteLine("With k = 1");
@@ -48,7 +49,7 @@ namespace knn
       Console.WriteLine("==========================");
       for (int i = 0; i < k; ++i)
       {
-        int c = (int) trainData[info[i].idx][3]; //to zmienilem
+        int c = (int) trainData[info[i].idx][4]; //to zmienilem
         string dist = info[i].dist.ToString("F3");
         Console.WriteLine("( " + trainData[info[i].idx][0] +
                           "," + trainData[info[i].idx][1] + " )  :  " +
@@ -63,7 +64,7 @@ namespace knn
       int[] votes = new int[numClasses];  // One cell per class
       for (int i = 0; i < k; ++i) {       // Just first k
         int idx = info[i].idx;            // Which train item
-        int c = (int)trainData[idx][3];   // Class in last cell //to zmienilem
+        int c = (int)trainData[idx][4];   // Class in last cell //to zmienilem
         ++votes[c];
       }
       int mostVotes = 0;
@@ -79,13 +80,15 @@ namespace knn
     static double Distance(double[] unknown,
       double[] data) {
       double sum = 0.0;
-     // sum = first.Select((x, i) => (x - second[i]) * (x - second[i])).Sum(); //nie dziala
-     sum = Math.Sqrt(data.Zip(unknown, (a, b) => (a - b)*(a - b)).Sum()); //stackoverflow.com/questions/8914669
+      //sum = data.Select((x, i) => (x - unknown[i]) * (x - unknown[i])).Sum(); //nie dziala
+      //sum = Math.Sqrt(data.Zip(unknown, (a, b) => (a - b)*(a - b)).Sum()); //stackoverflow.com/questions/8914669
+      for (int i = 0; i < unknown.Length; ++i)
+        sum += (unknown[i] - data[i]) * (unknown[i] - data[i]);
       return Math.Sqrt(sum);
     }
     static double[][] LoadData() {
-      double[][] data = new Double[1000][];
-      using(var reader = new StreamReader(@"C:\Users\jakub.prusakiewicz\RiderProjects\knn\knn\MOCK_DATA_trzy.csv"))
+      double[][] data = new Double[150][];
+      using(var reader = new StreamReader(@"C:\Users\jakub.prusakiewicz\RiderProjects\knn\knn\iris.csv"))
       {
         
         var firstLine = reader.ReadLine();
@@ -95,14 +98,29 @@ namespace knn
           columnsCount = firstLine.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries).Length;
         }
         Console.WriteLine("Loading data: " + firstLine);
-        Console.WriteLine("number of features: " + columnsCount);
+        Console.WriteLine("number of Columns: " + columnsCount);
         Console.WriteLine("---");
         int i = 0;
         while (!reader.EndOfStream)
         {
           var line = reader.ReadLine();
+          Console.WriteLine(line);
           var values = line.Split(',');
-          data[i] = new Double[] { Convert.ToDouble(values[0]), Convert.ToDouble(values[1]), Convert.ToDouble(values[2]), Convert.ToDouble(values[3])};
+          double class_num = -1;
+          if (values[4] == "setosa")
+            class_num = 0; //todo change for 0
+          else if (values[4] == "versicolor")
+            class_num = 1;
+          else if (values[4] == "virginica")
+            class_num = 2;
+          else
+            Console.WriteLine("CIPARAKIETA");
+
+          data[i] = new Double[] { double.Parse(values[0], System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo),
+            double.Parse(values[1],System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo),
+            double.Parse(values[2], System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo),
+            double.Parse(values[3], System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo), 
+            class_num};
           i++;
         }
 
