@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
 namespace knn
 {
   class KNNProgram
@@ -80,40 +84,39 @@ namespace knn
       return Math.Sqrt(sum);
     }
     static double[][] LoadData() {
+      using(var reader = new StreamReader(@"C:\Users\jakub.prusakiewicz\RiderProjects\knn\knn\MOCK_DATA.csv"))
+      {
+
+        List<string> listA = new List<string>();
+        List<string> listB = new List<string>();
+        List<string> listC = new List<string>();
+        var firstLine = reader.ReadLine();
+        int columnsCount = 0;
+        if (firstLine != null)
+        {
+          columnsCount = firstLine.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries).Length;
+        }
+        Console.WriteLine(columnsCount);
+        Console.ReadLine();
+        while (!reader.EndOfStream)
+        {
+          var line = reader.ReadLine();
+          var values = line.Split(',');
+
+          listA.Add(values[0]);
+          listB.Add(values[1]);
+          listC.Add(values[2]);
+        }
+        // listA.ForEach(Console.Write);
+        // Console.WriteLine();
+        // listB.ForEach(Console.Write);
+        // Console.WriteLine();
+        // listC.ForEach(Console.Write);
+      }
+      // Console.WriteLine("kuba, jestes zahevusty");
+      // Console.ReadLine();
       double[][] data = new double[33][];
-      data[0] = new double[] { 2.0, 4.0, 0 };
-      data[1] = new double[] { 2.0, 1.0, 2 };
-      data[2] = new double[] { 3.0, 1.0, 2 };
-      data[3] = new double[] { 1.0, 4.0, 2 };
-      data[4] = new double[] { 8.0, 3.0, 1 };
-      data[5] = new double[] { 2.0, 2.0, 2 };
-      data[6] = new double[] { 3.0, 2.0, 2 };
-      data[7] = new double[] { 3.0, 3.0, 0 };
-      data[8] = new double[] { 4.0, 3.0, 0 };
-      data[9] = new double[] { 5.0, 3.0, 0 };
-      data[10] = new double[] { 2.0, 6.0, 0 };
-      data[11] = new double[] { 2.0, 5.0, 0 };
-      data[12] = new double[] { 3.0, 4.0, 1 };
-      data[13] = new double[] { 6.0, 4.0, 0 };
-      data[14] = new double[] { 6.0, 5.0, 0 };
-      data[15] = new double[] { 6.0, 6.0, 0 };
-      data[16] = new double[] { 3.0, 7.0, 0 };
-      data[17] = new double[] { 4.0, 7.0, 0 };
-      data[18] = new double[] { 5.0, 7.0, 0 };
-      data[19] = new double[] { 3.0, 6.0, 1 };
-      data[20] = new double[] { 3.0, 5.0, 1 };
-      data[21] = new double[] { 4.0, 4.0, 1 };
-      data[22] = new double[] { 4.0, 5.0, 1 };
-      data[23] = new double[] { 4.0, 6.0, 1 };
-      data[24] = new double[] { 5.0, 4.0, 1 };
-      data[25] = new double[] { 5.0, 5.0, 1 };
-      data[26] = new double[] { 5.0, 6.0, 1};
-      data[27] = new double[] { 6.0, 1.0, 1 };
-      data[28] = new double[] { 7.0, 1.0, 1 };
-      data[29] = new double[] { 7.0, 2.0, 1 };
-      data[30] = new double[] { 8.0, 1.0, 1 };
-      data[31] = new double[] {8.0, 2.0, 1};
-      data[32] = new double[] { 4.0, 2.0, 2 };
+      data[0] = new double[] { 2.0, 4.0, 5.0, 0 };
       return data;
     }
   } // Program class
