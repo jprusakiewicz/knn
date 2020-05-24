@@ -11,7 +11,7 @@ namespace knn
     {
       Console.WriteLine("Begin k-NN classification demo ");
       double[][] trainData = LoadData();
-      int numFeatures = 2;
+      int numFeatures = 3;
       int numClasses = 3;
       double[] unknown = new double[] { 5.25, 1.75 };
       Console.WriteLine("Predictor values: 5.25 1.75 ");
@@ -48,7 +48,7 @@ namespace knn
       Console.WriteLine("==========================");
       for (int i = 0; i < k; ++i)
       {
-        int c = (int) trainData[info[i].idx][2];
+        int c = (int) trainData[info[i].idx][3]; //to zmienilem
         string dist = info[i].dist.ToString("F3");
         Console.WriteLine("( " + trainData[info[i].idx][0] +
                           "," + trainData[info[i].idx][1] + " )  :  " +
@@ -63,7 +63,7 @@ namespace knn
       int[] votes = new int[numClasses];  // One cell per class
       for (int i = 0; i < k; ++i) {       // Just first k
         int idx = info[i].idx;            // Which train item
-        int c = (int)trainData[idx][2];   // Class in last cell
+        int c = (int)trainData[idx][3];   // Class in last cell //to zmienilem
         ++votes[c];
       }
       int mostVotes = 0;
@@ -79,44 +79,34 @@ namespace knn
     static double Distance(double[] unknown,
       double[] data) {
       double sum = 0.0;
-      for (int i = 0; i < unknown.Length; ++i)
-        sum += (unknown[i] - data[i]) * (unknown[i] - data[i]);
+     // sum = first.Select((x, i) => (x - second[i]) * (x - second[i])).Sum(); //nie dziala
+     sum = Math.Sqrt(data.Zip(unknown, (a, b) => (a - b)*(a - b)).Sum()); //stackoverflow.com/questions/8914669
       return Math.Sqrt(sum);
     }
     static double[][] LoadData() {
-      using(var reader = new StreamReader(@"C:\Users\jakub.prusakiewicz\RiderProjects\knn\knn\MOCK_DATA.csv"))
+      double[][] data = new Double[1000][];
+      using(var reader = new StreamReader(@"C:\Users\jakub.prusakiewicz\RiderProjects\knn\knn\MOCK_DATA_trzy.csv"))
       {
-
-        List<string> listA = new List<string>();
-        List<string> listB = new List<string>();
-        List<string> listC = new List<string>();
+        
         var firstLine = reader.ReadLine();
         int columnsCount = 0;
         if (firstLine != null)
         {
           columnsCount = firstLine.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries).Length;
         }
-        Console.WriteLine(columnsCount);
-        Console.ReadLine();
+        Console.WriteLine("Loading data: " + firstLine);
+        Console.WriteLine("number of features: " + columnsCount);
+        Console.WriteLine("---");
+        int i = 0;
         while (!reader.EndOfStream)
         {
           var line = reader.ReadLine();
           var values = line.Split(',');
-
-          listA.Add(values[0]);
-          listB.Add(values[1]);
-          listC.Add(values[2]);
+          data[i] = new Double[] { Convert.ToDouble(values[0]), Convert.ToDouble(values[1]), Convert.ToDouble(values[2]), Convert.ToDouble(values[3])};
+          i++;
         }
-        // listA.ForEach(Console.Write);
-        // Console.WriteLine();
-        // listB.ForEach(Console.Write);
-        // Console.WriteLine();
-        // listC.ForEach(Console.Write);
+
       }
-      // Console.WriteLine("kuba, jestes zahevusty");
-      // Console.ReadLine();
-      double[][] data = new double[33][];
-      data[0] = new double[] { 2.0, 4.0, 5.0, 0 };
       return data;
     }
   } // Program class
