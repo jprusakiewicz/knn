@@ -8,30 +8,34 @@ namespace knn
 {
   class KNNProgram
   {
+    private static string CSV_PATH = @"C:\Users\jakub.prusakiewicz\RiderProjects\knn\knn\iris.csv";
+    private static int CSV_LENGTH = 150;
     static void Main(string[] args)
     {
       Console.WriteLine("Begin k-NN classification demo ");
       double[][] trainData = LoadData();
       int numFeatures = 4;
       int numClasses = 3;
-      double[] unknown = new double[] { 7.2, 3.0, 5.8, 1.6};
-      Console.WriteLine("Predictor values: 5.25 1.75 ");
+      double[] unknown = new double[] {6.2,	2.2 ,	4.5 ,	1.5};
+      Console.WriteLine("Predictor values: ");
+      var predictorValues = String.Join(" | ",unknown);
+      Console.WriteLine(predictorValues);
       int k = 1;
-      Console.WriteLine("With k = 1");
+      Console.WriteLine("With k = " + k);
       int predicted = Classify(unknown, trainData,
-        numClasses, k);
+        numClasses, k, numFeatures);
       Console.WriteLine("Predicted class = " + predicted);
       k = 4;
-      Console.WriteLine("With k = 4");
+      Console.WriteLine("With k = " + k);
       predicted = Classify(unknown, trainData,
-        numClasses, k);
+        numClasses, k, numFeatures);
       Console.WriteLine("Predicted class = " + predicted);
       Console.WriteLine("End k-NN demo ");
       Console.ReadLine();
     }
 
     static int Classify(double[] unknown,
-      double[][] trainData, int numClasses, int k)
+      double[][] trainData, int numClasses, int k, int numFeatures)
     {
       int n = trainData.Length;
       IndexAndDistance[] info = new IndexAndDistance[n];
@@ -49,22 +53,22 @@ namespace knn
       Console.WriteLine("==========================");
       for (int i = 0; i < k; ++i)
       {
-        int c = (int) trainData[info[i].idx][4]; //to zmienilem
+        int c = (int) trainData[info[i].idx][numFeatures]; //to zmienilem
         string dist = info[i].dist.ToString("F3");
         Console.WriteLine("( " + trainData[info[i].idx][0] +
                           "," + trainData[info[i].idx][1] + " )  :  " +
                           dist + "        " + c);
       }
-      int result = Vote(info, trainData, numClasses, k);
+      int result = Vote(info, trainData, numClasses, k, numFeatures);
       return result;
     } // Classify
 
     static int Vote(IndexAndDistance[] info,
-      double[][] trainData, int numClasses, int k) {
+      double[][] trainData, int numClasses, int k, int numFeatures) {
       int[] votes = new int[numClasses];  // One cell per class
       for (int i = 0; i < k; ++i) {       // Just first k
         int idx = info[i].idx;            // Which train item
-        int c = (int)trainData[idx][4];   // Class in last cell //to zmienilem
+        int c = (int)trainData[idx][numFeatures];   // Class in last cell //to zmienilem
         ++votes[c];
       }
       int mostVotes = 0;
@@ -87,8 +91,8 @@ namespace knn
       return Math.Sqrt(sum);
     }
     static double[][] LoadData() {
-      double[][] data = new Double[150][];
-      using(var reader = new StreamReader(@"C:\Users\jakub.prusakiewicz\RiderProjects\knn\knn\iris.csv"))
+      double[][] data = new Double[CSV_LENGTH][];
+      using(var reader = new StreamReader(CSV_PATH))
       {
         
         var firstLine = reader.ReadLine();
@@ -104,23 +108,31 @@ namespace knn
         while (!reader.EndOfStream)
         {
           var line = reader.ReadLine();
-          Console.WriteLine(line);
-          var values = line.Split(',');
-          double class_num = -1;
-          if (values[4] == "setosa")
-            class_num = 0; //todo change for 0
-          else if (values[4] == "versicolor")
-            class_num = 1;
-          else if (values[4] == "virginica")
-            class_num = 2;
-          else
-            Console.WriteLine("CIPARAKIETA");
+          // Console.WriteLine(line); // uncomment to see training data
+          if (line != null)
+          {
+            var values = line.Split(',');
+            double classNum;
+            if (values[4] == "setosa")
+              classNum = 0;
+            else if (values[4] == "versicolor")
+              classNum = 1;
+            else if (values[4] == "virginica")
+              classNum = 2;
+            else
+              throw new System.ArgumentException("unclear training data", "class_name");
 
-          data[i] = new Double[] { double.Parse(values[0], System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo),
-            double.Parse(values[1],System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo),
-            double.Parse(values[2], System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo),
-            double.Parse(values[3], System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.NumberFormatInfo.InvariantInfo), 
-            class_num};
+            data[i] = new Double[] { double.Parse(values[0], System.Globalization.NumberStyles.AllowDecimalPoint,
+                System.Globalization.NumberFormatInfo.InvariantInfo),
+              double.Parse(values[1],System.Globalization.NumberStyles.AllowDecimalPoint,
+                System.Globalization.NumberFormatInfo.InvariantInfo),
+              double.Parse(values[2], System.Globalization.NumberStyles.AllowDecimalPoint,
+                System.Globalization.NumberFormatInfo.InvariantInfo),
+              double.Parse(values[3], System.Globalization.NumberStyles.AllowDecimalPoint,
+                System.Globalization.NumberFormatInfo.InvariantInfo), 
+              classNum};
+          }
+
           i++;
         }
 
