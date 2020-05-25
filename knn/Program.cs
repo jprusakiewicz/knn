@@ -10,12 +10,23 @@ namespace knn
   {
     private static string CSV_PATH = @"C:\Users\jakub.prusakiewicz\RiderProjects\knn\knn\iris.csv";
     private static int CSV_LENGTH = 150;
+    // private static string CSV_PATH = @"C:\Users\jakub.prusakiewicz\RiderProjects\knn\knn\MOCK_DATA_cztery.csv";
+    // private static int CSV_LENGTH = 1000;
+    
+    private static bool IS_CLASS_NAME = true;
+    
+    private static string FIRST_CLASS_NAME = "setosa";
+    private static string SECOND_CLASS_NAME = "versicolor";
+    private static string THIRD_CLASS_NAME = "virginica";
+    
+
+    
     static void Main(string[] args)
     {
       Console.WriteLine("Begin k-NN classification demo ");
       double[][] trainData = LoadData();
       int numFeatures = 4;
-      int numClasses = 3;
+      int numClasses = 4;
       double[] unknown = new double[] {6.2,	2.2 ,	4.5 ,	1.5};
       Console.WriteLine("Predictor values: ");
       var predictorValues = String.Join(" | ",unknown);
@@ -113,24 +124,43 @@ namespace knn
           {
             var values = line.Split(',');
             double classNum;
-            if (values[4] == "setosa")
-              classNum = 0;
-            else if (values[4] == "versicolor")
-              classNum = 1;
-            else if (values[4] == "virginica")
-              classNum = 2;
-            else
-              throw new System.ArgumentException("unclear training data", "class_name");
+            if (IS_CLASS_NAME)
+            {
 
-            data[i] = new Double[] { double.Parse(values[0], System.Globalization.NumberStyles.AllowDecimalPoint,
-                System.Globalization.NumberFormatInfo.InvariantInfo),
-              double.Parse(values[1],System.Globalization.NumberStyles.AllowDecimalPoint,
-                System.Globalization.NumberFormatInfo.InvariantInfo),
-              double.Parse(values[2], System.Globalization.NumberStyles.AllowDecimalPoint,
-                System.Globalization.NumberFormatInfo.InvariantInfo),
-              double.Parse(values[3], System.Globalization.NumberStyles.AllowDecimalPoint,
-                System.Globalization.NumberFormatInfo.InvariantInfo), 
-              classNum};
+              if (values[4] == FIRST_CLASS_NAME)
+                classNum = 0;
+              else if (values[4] == SECOND_CLASS_NAME)
+                classNum = 1;
+              else if (values[4] == THIRD_CLASS_NAME)
+                classNum = 2;
+              else
+                throw new System.ArgumentException("unclear training data", "class_name");
+              
+              data[i] = new Double[] { 
+                double.Parse(values[0], System.Globalization.NumberStyles.AllowDecimalPoint,
+                  System.Globalization.NumberFormatInfo.InvariantInfo),
+                double.Parse(values[1],System.Globalization.NumberStyles.AllowDecimalPoint,
+                  System.Globalization.NumberFormatInfo.InvariantInfo),
+                double.Parse(values[2], System.Globalization.NumberStyles.AllowDecimalPoint,
+                  System.Globalization.NumberFormatInfo.InvariantInfo),
+                double.Parse(values[3], System.Globalization.NumberStyles.AllowDecimalPoint,
+                  System.Globalization.NumberFormatInfo.InvariantInfo), 
+                classNum};
+            }
+            else
+            {
+              data[i] = new Double[] { 
+                double.Parse(values[0], System.Globalization.NumberStyles.AllowDecimalPoint,
+                  System.Globalization.NumberFormatInfo.InvariantInfo),
+                double.Parse(values[1],System.Globalization.NumberStyles.AllowDecimalPoint,
+                  System.Globalization.NumberFormatInfo.InvariantInfo),
+                double.Parse(values[2], System.Globalization.NumberStyles.AllowDecimalPoint,
+                  System.Globalization.NumberFormatInfo.InvariantInfo),
+                double.Parse(values[3], System.Globalization.NumberStyles.AllowDecimalPoint,
+                  System.Globalization.NumberFormatInfo.InvariantInfo), 
+                double.Parse(values[4])};
+            }
+            
           }
 
           i++;
