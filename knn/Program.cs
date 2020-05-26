@@ -25,20 +25,37 @@ namespace knn
     {
       Console.WriteLine("Begin k-NN classification demo ");
       double[][] trainData = LoadData();
+      //todo randomize data
+      double[][] validationData = SplitData(trainData, out trainData);
       int numFeatures = 4;
       int numClasses = 4;
-      double[] unknown = new double[] {6.2,	2.2 ,	4.5 ,	1.5};
+      // double[] unknown = new double[] {6.2,	2.2 ,	4.5 ,	1.5};
+      // Console.WriteLine("Predictor values: ");
+      // var predictorValues = String.Join(" | ",unknown);
+      // Console.WriteLine(predictorValues);
+      // int k = 1;
+      // Console.WriteLine("With k = " + k);
+      // int predicted = Classify(unknown, trainData,
+      //   numClasses, k, numFeatures);
+      // Console.WriteLine("Predicted class = " + predicted);
+      // k = 4;
+      // Console.WriteLine("With k = " + k);
+      // predicted = Classify(unknown, trainData,
+      //   numClasses, k, numFeatures);
+      // Console.WriteLine("Predicted class = " + predicted);
+      // Console.WriteLine("End k-NN demo ");
+      // Console.ReadLine();
       Console.WriteLine("Predictor values: ");
-      var predictorValues = String.Join(" | ",unknown);
+      var predictorValues = String.Join(" | ",validationData[1]);
       Console.WriteLine(predictorValues);
       int k = 1;
       Console.WriteLine("With k = " + k);
-      int predicted = Classify(unknown, trainData,
+      int predicted = Classify(validationData[1], trainData,
         numClasses, k, numFeatures);
       Console.WriteLine("Predicted class = " + predicted);
       k = 4;
       Console.WriteLine("With k = " + k);
-      predicted = Classify(unknown, trainData,
+      predicted = Classify(validationData[1], trainData,
         numClasses, k, numFeatures);
       Console.WriteLine("Predicted class = " + predicted);
       Console.WriteLine("End k-NN demo ");
@@ -167,7 +184,21 @@ namespace knn
         }
 
       }
+      // randomize data
+      Random rnd=new Random();
+      data = data.OrderBy(x => rnd.Next()).ToArray();    
       return data;
+    }
+    static public T[] Split<T>(T[] array, int index, out T[] first) {
+      first = array.Skip(index).ToArray();
+       return array.Take(index).ToArray();
+    }
+
+    static public T[] SplitData<T>(T[] array, out T[] first)
+    {
+      var len = array.Length / 10;
+      double[][] validationData = new double[len][];
+      return Split(array, array.Length / 10, out first);
     }
   } // Program class
   public class IndexAndDistance : IComparable<IndexAndDistance>
@@ -182,4 +213,5 @@ namespace knn
       else return 0;
     }
   }
+  
 } // ns
