@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -10,80 +11,44 @@ namespace knn
   {
     private static string CSV_PATH = @"C:\Users\jakub.prusakiewicz\RiderProjects\knn\knn\iris.csv";
     private static int CSV_LENGTH = 150;
+    private static bool IS_CLASS_NAME = true;
+    
+    //random generated data
     // private static string CSV_PATH = @"C:\Users\jakub.prusakiewicz\RiderProjects\knn\knn\MOCK_DATA_cztery.csv";
     // private static int CSV_LENGTH = 1000;
-    
-    private static bool IS_CLASS_NAME = true;
+    // private static bool IS_CLASS_NAME = false;
     
     private static string FIRST_CLASS_NAME = "setosa";
     private static string SECOND_CLASS_NAME = "versicolor";
     private static string THIRD_CLASS_NAME = "virginica";
-    
-
+    static int k = 4;
+    static int numFeatures = 4;
+    static int numClasses = 4;
     
     static void Main(string[] args)
     {
       Console.WriteLine("Begin k-NN classification demo ");
       double[][] trainData = LoadData();
-      //todo randomize data
       double[][] validationData = SplitData(trainData, out trainData);
-      int numFeatures = 4;
-      int numClasses = 4;
-      // double[] unknown = new double[] {6.2,	2.2 ,	4.5 ,	1.5};
-      // Console.WriteLine("Predictor values: ");
-      // var predictorValues = String.Join(" | ",unknown);
-      // Console.WriteLine(predictorValues);
-      // int k = 1;
-      // Console.WriteLine("With k = " + k);
-      // int predicted = Classify(unknown, trainData,
-      //   numClasses, k, numFeatures);
-      // Console.WriteLine("Predicted class = " + predicted);
-      // k = 4;
-      // Console.WriteLine("With k = " + k);
-      // predicted = Classify(unknown, trainData,
-      //   numClasses, k, numFeatures);
-      // Console.WriteLine("Predicted class = " + predicted);
-      // Console.WriteLine("End k-NN demo ");
-      // Console.ReadLine();
-      int[] true_label = new int[validationData.Length-1];
-      int[] pred_label = new int[validationData.Length-1];
+
+      int[] trueLabel = new int[validationData.Length-1];
+      int[] predLabel = new int[validationData.Length-1];
       double[][] unknown = new double[validationData.Length-1][];
       for (int i = 0; i < validationData.Length-1; i++)
       {
-        true_label[i] = (int) validationData[i][4];
+        trueLabel[i] = (int) validationData[i][4];
         unknown[i] = validationData[i].Where((item, index) => index != validationData[i].Length-1).ToArray();
       }
-      // var true_label = validationData[1][4];
-     // var unknown = validationData[1].Where((item, index) => index != validationData[1].Length-1).ToArray();
-     
-     
-      // Console.WriteLine("Predictor values: ");
-      // var predictorValues = String.Join(" | ",unknown[0]);
-      // Console.WriteLine("real: " + true_label);
-      // Console.WriteLine(predictorValues);
-      // int k = 1;
-      // Console.WriteLine("With k = " + k);
-      // int predicted_label = Classify(unknown[0], trainData,
-      //   numClasses, k, numFeatures);
-      // Console.WriteLine("Predicted class = " + predicted_label);
-      // k = 4;
-      // Console.WriteLine("With k = " + k);
-      // predicted_label = Classify(unknown[0], trainData,
-      //   numClasses, k, numFeatures);
-      // Console.WriteLine("Predicted class = " + predicted_label);
-      // Console.WriteLine("End k-NN demo ");
-      // Console.ReadLine();
 
-      int k = 1;
       for (int i = 0; i < validationData.Length - 1; i++)
       {
-        pred_label[i] = Classify(unknown[i], trainData,
+        predLabel[i] = Classify(unknown[i], trainData,
           numClasses, k, numFeatures);
-        Console.WriteLine("pred: "+ pred_label[i]+ " | true: " + true_label[i]);
+        Console.WriteLine("pred: "+ predLabel[i]+ " | true: " + trueLabel[i]);
       }
-      var confusionMatrix = BuildConfusionMatrix(true_label, pred_label, numClasses);
+      var confusionMatrix = BuildConfusionMatrix(trueLabel, predLabel, numClasses);
       Console.WriteLine("Confusion matrix:");
-      Console.WriteLine("` 0 1 2 3     Horrizontaly : predicted_label     "+ "Vertically: true_label");
+      Console.WriteLine("` 0 1 2 3     Horizontally : predicted label     "+ "Vertically: true label");
       for (int i = 0; i < confusionMatrix.GetLength(0); i++)
       {
         Console.Write(i+"|");
@@ -159,8 +124,6 @@ namespace knn
     static double Distance(double[] unknown,
       double[] data) {
       double sum = 0.0;
-      //sum = data.Select((x, i) => (x - unknown[i]) * (x - unknown[i])).Sum(); //nie dziala
-      //sum = Math.Sqrt(data.Zip(unknown, (a, b) => (a - b)*(a - b)).Sum()); //stackoverflow.com/questions/8914669
       for (int i = 0; i < unknown.Length; ++i)
         sum += (unknown[i] - data[i]) * (unknown[i] - data[i]);
       return Math.Sqrt(sum);
@@ -169,13 +132,10 @@ namespace knn
       double[][] data = new Double[CSV_LENGTH][];
       using(var reader = new StreamReader(CSV_PATH))
       {
-        
         var firstLine = reader.ReadLine();
-        int columnsCount = 0;
-        if (firstLine != null)
-        {
-          columnsCount = firstLine.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries).Length;
-        }
+        Debug.Assert(firstLine != null, nameof(firstLine) + " != null");
+        int columnsCount = firstLine.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries).Length;
+        
         Console.WriteLine("Loading data: " + firstLine);
         Console.WriteLine("number of Columns: " + columnsCount);
         Console.WriteLine("---");
@@ -201,27 +161,19 @@ namespace knn
                 throw new System.ArgumentException("unclear training data", "class_name");
               
               data[i] = new Double[] { 
-                double.Parse(values[0], System.Globalization.NumberStyles.AllowDecimalPoint,
-                  System.Globalization.NumberFormatInfo.InvariantInfo),
-                double.Parse(values[1],System.Globalization.NumberStyles.AllowDecimalPoint,
-                  System.Globalization.NumberFormatInfo.InvariantInfo),
-                double.Parse(values[2], System.Globalization.NumberStyles.AllowDecimalPoint,
-                  System.Globalization.NumberFormatInfo.InvariantInfo),
-                double.Parse(values[3], System.Globalization.NumberStyles.AllowDecimalPoint,
-                  System.Globalization.NumberFormatInfo.InvariantInfo), 
+                double.Parse(values[0], NumberStyles.AllowDecimalPoint, NumberFormatInfo.InvariantInfo),
+                double.Parse(values[1],NumberStyles.AllowDecimalPoint, NumberFormatInfo.InvariantInfo),
+                double.Parse(values[2], NumberStyles.AllowDecimalPoint, NumberFormatInfo.InvariantInfo),
+                double.Parse(values[3], NumberStyles.AllowDecimalPoint, NumberFormatInfo.InvariantInfo), 
                 classNum};
             }
             else
             {
               data[i] = new Double[] { 
-                double.Parse(values[0], System.Globalization.NumberStyles.AllowDecimalPoint,
-                  System.Globalization.NumberFormatInfo.InvariantInfo),
-                double.Parse(values[1],System.Globalization.NumberStyles.AllowDecimalPoint,
-                  System.Globalization.NumberFormatInfo.InvariantInfo),
-                double.Parse(values[2], System.Globalization.NumberStyles.AllowDecimalPoint,
-                  System.Globalization.NumberFormatInfo.InvariantInfo),
-                double.Parse(values[3], System.Globalization.NumberStyles.AllowDecimalPoint,
-                  System.Globalization.NumberFormatInfo.InvariantInfo), 
+                double.Parse(values[0], NumberStyles.AllowDecimalPoint, NumberFormatInfo.InvariantInfo),
+                double.Parse(values[1],NumberStyles.AllowDecimalPoint, NumberFormatInfo.InvariantInfo),
+                double.Parse(values[2], NumberStyles.AllowDecimalPoint, NumberFormatInfo.InvariantInfo),
+                double.Parse(values[3], NumberStyles.AllowDecimalPoint, NumberFormatInfo.InvariantInfo), 
                 double.Parse(values[4])};
             }
             
