@@ -23,7 +23,7 @@ namespace knn
     private static string THIRD_CLASS_NAME = "virginica";
     static int k = 4;
     static int numFeatures = 4;
-    static int numClasses = 4;
+    static int numClasses = 3;
     
     static void Main(string[] args)
     {
@@ -48,7 +48,7 @@ namespace knn
       }
       var confusionMatrix = BuildConfusionMatrix(trueLabel, predLabel, numClasses);
       Console.WriteLine("Confusion matrix:");
-      Console.WriteLine("` 0 1 2 3     Horizontally : predicted label     "+ "Vertically: true label");
+      Console.WriteLine("` 0 1 2     Horizontally : predicted label     "+ "Vertically: true label");
       for (int i = 0; i < confusionMatrix.GetLength(0); i++)
       {
         Console.Write(i+"|");
